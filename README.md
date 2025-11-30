@@ -1,11 +1,11 @@
-Smart Waste Material Detection
+##Smart Waste Material Detection
 AI-powered system to classify waste into correct recycling categories.
 
 A smart and clean solution that uses Deep Learning + Flask Web App to identify waste materials such as Plastic, Metal, Paper, Glass, Trash, Cardboard etc.
 Built for automation, smart bins, eco-projects, and AI portfolio enhancement.
 
 
-Highlights
+##Highlights
 
 Deep Learning CNN Model (TensorFlow/Keras)
 Beautiful Flask Web Interface
@@ -16,12 +16,12 @@ Clean UI with modern design
 Training graph included
 
 
-📝 Project Description
+##Project Description
 
 This project automatically identifies the type of waste material using an AI model trained on a garbage classification dataset.
 The model analyzes an uploaded image (or live camera capture), processes it, and returns the predicted waste category.
 
-AI Model Overview
+##AI Model Overview
 
 Model: CNN (Convolutional Neural Network)
 Framework: TensorFlow / Keras
@@ -30,11 +30,12 @@ Classes: Paper, Plastic, Metal, Glass, Cardboard, Trash
 Optimizer: Adam
 Loss Function: Categorical Crossentropy
 
-Training Results
+##Training Results
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0412fad3-4b2a-4d51-8ef3-c0a2efe03b9e" />
+<img width="567" height="432" alt="Training output" src="https://github.com/user-attachments/assets/c49a93c0-1e84-4362-8778-7b0306d7db48" />
 
-Future Upgrades
+
+##Future Upgrades
 
 Add YOLO object detection
 Multi-object waste classification
@@ -42,6 +43,6 @@ Deploy on cloud platforms
 Mobile app integration
 
 
-Created by
+###Created by
 Wania Shahid
 AI | Deep Learning | Smart Waste Management Project
