@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Waste Classifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    /* General Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: url('static/background_img.png') no-repeat center center/cover;
+    }
+
+    .logo {
+    width: 60px;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+  }
+
+    /* Glassmorphism Effect */
+    .container {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(0, 0, 0, 0.589);
+        padding: 25px;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        box-shadow: 0px 4px 15px black;
+        text-align: center;
+        border: 1px solid black;
+    }
+
+    h1 {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    /* Input Fields */
+    .input-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    label {
+        font-size: 14px;
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+
+    input, button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        outline: none;
+        transition: 0.3s ease;
+    }
+
+    input {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    input:focus {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid white;
+    }
+
+    button {
+        background: linear-gradient(45deg, #6e4dff, #3200e6);
+        color: white;
+        border: none;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: linear-gradient(45deg, #3200e6, #6e4dff);
+        box-shadow: 0 0 10px rgba(110, 77, 255, 0.7);
+    }
+
+    video, img {
+        margin-top: 15px;
+        max-width: 100%;
+        border-radius: 10px;
+        display: none;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #00ff99;
+    }
+
+    canvas {
+        display: none;
+    }
+
+    .spaced {
+        margin-top: 10px;
+    }
+    #submitbtn {
+      background: linear-gradient(45deg, #029724, #4dff59);
+    }
+  </style>
+</head>
+<body>
+  <img src="static/logo.png" alt="logo" class="logo">
+  <div class="container">
+    <h1>Smart Waste Classifier</h1>
+   
+    
+    <!-- Upload Image -->
+    <div class="input-group">
+      <label for="imageInput">Upload Waste Image:</label>
+      <input type="file" accept="image/*" id="imageInput" />
+    </div>
+
+    <img id="preview" alt="Image preview" />
+
+    <!-- Open Camera -->
+    <button onclick="openCamera()" class="spaced">Open Camera</button>
+    <video id="video" autoplay playsinline></video>
+    <button onclick="captureImage()" id="captureBtn" class="spaced">Capture</button>
+
+    <!-- Hidden Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Classify -->
+    <button onclick="sendImage()" id="submitbtn" class="spaced">Classify Waste</button>
+
+    <!-- Result -->
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    let selectedFile = null;
+
+    // File Upload
+    imageInput.addEventListener('change', function () {
+      selectedFile = this.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(selectedFile);
+    });
+
+    // Open Camera
+    function openCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+          video.style.display = 'block';
+          captureBtn.style.display = 'inline-block';
+        })
+        .catch((err) => {
+          alert("Camera access denied or not available.");
+          console.error(err);
+        });
+    }
+
+    // Capture from Camera
+    function captureImage() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      canvas.toBlob(blob => {
+        selectedFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
+        preview.src = URL.createObjectURL(selectedFile);
+        preview.style.display = 'block';
+        video.style.display = 'none';
+        captureBtn.style.display = 'none';
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }, 'image/jpeg');
+    }
+
+    // Send to Backend
+    async function sendImage() {
+      if (!selectedFile) {
+        alert("Please select or capture an image.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      try {
+        const response = await fetch("http://localhost:5000/predict", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+        document.getElementById("result").textContent = "Prediction: " + result.prediction;
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Prediction failed.");
+      }
+    }
+  </script>
+
+</body>
+</html>
